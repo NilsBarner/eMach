@@ -2,8 +2,6 @@
 
 import sys
 sys.path.append("C:/Users/nmb48/Documents/GitHub/eMach")  # Adjust path as needed
-# import eMach
-
 import numpy as np
 import scipy.optimize as op
 from matplotlib import pyplot as plt
