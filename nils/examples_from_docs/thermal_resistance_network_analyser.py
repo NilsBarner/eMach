@@ -2,6 +2,7 @@
 
 import sys
 sys.path.append("C:/Users/nmb48/Documents/GitHub/eMach")  # Adjust path as needed
+import eMach
 import numpy as np
 import scipy.optimize as op
 from matplotlib import pyplot as plt
@@ -155,7 +156,53 @@ ax.plot([x[4],x[0]],[y[4],y[0]],'r--')
 ax.set_yticks([])
 ax.set_xticks([])
 
+#%% Check node and system enthalpy conservation equations
 
+def check_node_enthalpy_conservation(problem: ThermalNetworkProblem): # Q_dot: list, Resistances: list):
+
+    Q_tot_in = sum(problem.Q_dot)
+    Q_tot_out = 0
+
+    for node_idx in range(N_nodes):
+        Q_gen = problem.Q_dot[node_idx]
+    
+        Q_flows = []
+        for r in problem.res:
+            
+            if node_idx == r.Node1:
+                # print(r.Descr)  # check whether correct resistances have been assigned
+                Q_flow = (T[r.Node2] - T[r.Node1]) / r.resistance_value
+                Q_flows.append(Q_flow)
+            elif node_idx == r.Node2:
+                # print(r.Descr)  # check whether correct resistances have been assigned
+                Q_flow = (T[r.Node1] - T[r.Node2]) / r.resistance_value
+                Q_flows.append(Q_flow)
+            else:
+                continue
+        
+        if node_idx not in [row[0] for row in problem.T_ref]:
+        
+            # Check node enthalpy conservation
+            atol = sum(Q_flows) + Q_gen
+            if np.isclose(atol, 0):
+                print(f"✅ Node '{node_idx}' is balanced within absolute tolerance {atol} W.")
+            else:
+                print(f"⚠️ Node '{node_idx}' is unbalanced with absolute tolerance {atol} W.")
+                
+        else:
+            Q_out = sum(Q_flows) + Q_gen
+            print(f"{Q_out} W of heat is leaving the network through node {node_idx}.")
+            Q_tot_out += Q_out
+                
+    # Check system enthalpy conservation
+    atol = -Q_tot_in + Q_tot_out
+    print()
+    if np.isclose(atol, 0):
+        print(f"✅ System is balanced within absolute tolerance {atol} W.")
+    else:
+        print(f"⚠️ System is unbalanced with absolute tolerance {atol} W.")
+        
+check_node_enthalpy_conservation(prob)
 
 
 

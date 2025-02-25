@@ -56,14 +56,20 @@ class ThermalNetworkAnalyzer:
             G = G + np.dot(np.dot(E, Sum_R), e)
 
         G_aug = G
-        Q_dot_aug = problem.Q_dot.copy()  # ADDED BY NILS ON 21.02.2025 INSTEAD OF COMMENTED LINE BELOW - want to create deep copy of array, otherwise node enthalpy balance is messed up by reference temperatures appended in line below
+        # =============================================================================
+        Q_dot_aug = problem.Q_dot.copy()
+        # CHECK WHETHER MY VARIATION WITH .copy() STILL WORKS WHEN MULTIPLE
+        # TEMPERATURES ARE SPECIFIED!!!
+        # =============================================================================
         for node, temp in problem.T_ref:
             G_aug[node, :] = np.zeros_like(G_aug[0, :])
             G_aug[node, node] = 1
-            # Q_dot_aug = problem.Q_dot
+            # # Q_dot_aug = problem.Q_dot
+            # Q_dot_aug = problem.Q_dot.copy()  # MODIFIED BY NILS ON 21.02.2025 FROM ABOVE LINE - want to create deep copy of array, otherwise node enthalpy balance is messed up by reference temperatures appended in line below
             Q_dot_aug[node] = temp
-        self.T = np.dot(np.linalg.inv(G_aug), Q_dot_aug)  # NILS: made 'T' an attribute for exertnal access
-        return self.T
+        T = np.dot(np.linalg.inv(G_aug), Q_dot_aug)
+        
+        return T
 
 
 class Material:
