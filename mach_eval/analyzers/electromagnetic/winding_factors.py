@@ -74,8 +74,17 @@ class WindingFactorsAnalyzer:
             coil_sides = np.count_nonzero(top_layer) + np.count_nonzero(bottom_layer)
             slot = np.arange(1,len(top_layer)+1)[:,None]
             k_w = top_layer*np.exp(-1j*harmonics_list*((slot-1)*alpha_c+alpha_1))+bottom_layer*np.exp(-1j*harmonics_list*((slot-1)*alpha_c+alpha_1))
-        else:
-            raise Exception("Error: Winding layer must be 1 or 2!")
+        elif len(winding_layout[:,0]) == 3:  # added by Nils on 03.03.2025
+            # raise Exception("Error: Winding layer must be 1 or 2!")
+            top_layer = winding_layout[0][:,None]
+            middle_layer = winding_layout[1][:,None]
+            bottom_layer = winding_layout[2][:,None]
+            alpha_c = 2*np.pi/len(top_layer)  # could equally write len(bottom_layer) or len(middle_layer)
+            coil_sides = np.count_nonzero(top_layer) + np.count_nonzero(middle_layer) + np.count_nonzero(bottom_layer)
+            slot = np.arange(1,len(top_layer)+1)[:,None]
+            k_w = top_layer*np.exp(-1j*harmonics_list*((slot-1)*alpha_c+alpha_1)) + \
+                  middle_layer*np.exp(-1j*harmonics_list*((slot-1)*alpha_c+alpha_1)) + \
+                  bottom_layer*np.exp(-1j*harmonics_list*((slot-1)*alpha_c+alpha_1))
             
         k_w = sum(k_w)/coil_sides
         
